@@ -36,6 +36,16 @@ Direct download links are provided here:
 * [VGG16-PyTorch](https://s3.amazonaws.com/deepcluster/vgg16/checkpoint.pth.tar)
 * [VGG16-prototxt](https://s3.amazonaws.com/deepcluster/vgg16/model.prototxt) + [VGG16-caffemodel](https://s3.amazonaws.com/deepcluster/vgg16/model.caffemodel)
 
+We also provide the last epoch cluster assignments for these models. After downloading, open the file with Python 2:
+```
+import pickle
+with open("./alexnet_cluster_assignment.pickle", "rb") as f:
+    b = pickle.load(f)
+```
+If you're a Python 3 user, specify ```encoding='latin1'``` in the load fonction.
+Each file is a list of (image path, cluster_index) tuples.
+* [AlexNet-clusters](https://s3.amazonaws.com/deepcluster/alexnet/alexnet_cluster_assignment.pickle)
+* [VGG16-clusters](https://s3.amazonaws.com/deepcluster/vgg16/vgg16_cluster_assignment.pickle)
 
 ## Running the unsupervised training
 
@@ -120,7 +130,10 @@ You need to download the [VOC 2007 dataset](http://host.robots.ox.ac.uk/pascal/V
 Indicate in `PROTO` and `MODEL` respectively the path to the prototxt file of the model and the path to the model weights of the model to evaluate.
 The flag `--train-from` allows to indicate the separation between the frozen and to-train layers.
 
-TODO: detection + segmentation
+We implemented [voc classification](https://github.com/facebookresearch/deepcluster/blob/master/eval_voc_classif.py) with PyTorch.
+
+Erratum: When training the MLP only (fc6-8), the parameters of scaling of the batch-norm layers in the whole network are trained. 
+With freezing these parameters we get 70.4 mAP.
 
 ### Linear classification on activations
 
@@ -229,6 +242,10 @@ From the visu folder, after having changed the fields ```MODEL```, ```EXP```, ``
 ```
 ./activ-retrieval.sh
 ```
+
+## License
+
+You may find out more about the license [here](https://github.com/facebookresearch/deepcluster/blob/master/LICENSE).
 
 ## Reference
 
