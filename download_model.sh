@@ -6,7 +6,7 @@
 #
 #!/bin/bash
 
-MODELROOT="${HOME}/deepcluster_models"
+MODELROOT="./deepcluster_models"
 
 mkdir -p ${MODELROOT}
 

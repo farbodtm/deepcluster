@@ -7,10 +7,15 @@
 import time
 
 import faiss
+import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
 import numpy as np
 from PIL import Image
 from PIL import ImageFile
 from scipy.sparse import csr_matrix, find
+from scipy.spatial.distance import pdist
+
+
 import torch
 import torch.utils.data as data
 import torchvision.transforms as transforms
@@ -73,7 +78,7 @@ class ReassignedDataset(data.Dataset):
         return len(self.imgs)
 
 
-def preprocess_features(npdata, pca=256):
+def preprocess_features(npdata, pca=64):
     """Preprocess an array of features.
     Args:
         npdata (np.array N * ndim): features to preprocess
@@ -139,6 +144,9 @@ def cluster_assign(images_lists, dataset):
 
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
+
+    normalize = transforms.Normalize(mean=[0.5, 0.5, 0.5],
+                                     std=[0.5, 0.5, 0.5])
     t = transforms.Compose([transforms.RandomResizedCrop(224),
                             transforms.RandomHorizontalFlip(),
                             transforms.ToTensor(),
@@ -159,8 +167,9 @@ def run_kmeans(x, nmb_clusters, verbose=False):
 
     # faiss implementation of k-means
     clus = faiss.Clustering(d, nmb_clusters)
-    clus.niter = 20
+    clus.niter = 10
     clus.max_points_per_centroid = 10000000
+    clus.verbose = True
     res = faiss.StandardGpuResources()
     flat_config = faiss.GpuIndexFlatConfig()
     flat_config.useFloat16 = False
@@ -170,11 +179,19 @@ def run_kmeans(x, nmb_clusters, verbose=False):
     # perform the training
     clus.train(x, index)
     _, I = index.search(x, 1)
+    centroids = np.array(faiss.vector_to_array(clus.centroids))
+    centroids = np.reshape(centroids, (-1, 64))
+    centd = pdist(centroids)
+    centroids2d = TSNE(n_components=2).fit_transform(centroids)
+    plt.scatter(centroids2d[:, 0], centroids2d[:, 1])
+    axes = plt.gca()
+    axes.set_xlim([-50,50])
+    axes.set_ylim([-50,50])
     losses = faiss.vector_to_array(clus.obj)
     if verbose:
         print('k-means loss evolution: {0}'.format(losses))
 
-    return [int(n[0]) for n in I], losses[-1]
+    return [int(n[0]) for n in I], losses[-1], plt, np.mean(centd)
 
 
 def arrange_clustering(images_lists):
@@ -202,7 +219,7 @@ class Kmeans:
         xb = preprocess_features(data)
 
         # cluster the data
-        I, loss = run_kmeans(xb, self.k, verbose)
+        I, loss, plot, davg  = run_kmeans(xb, self.k, verbose)
         self.images_lists = [[] for i in range(self.k)]
         for i in range(len(data)):
             self.images_lists[I[i]].append(i)
@@ -210,7 +227,7 @@ class Kmeans:
         if verbose:
             print('k-means time: {0:.0f} s'.format(time.time() - end))
 
-        return loss
+        return loss, plot, davg
 
 
 def make_adjacencyW(I, D, sigma):

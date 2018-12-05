@@ -6,14 +6,14 @@
 #
 #!/bin/bash
 
-DATA="/datasets01/imagenet_full_size/061417/"
-MODELROOT="${HOME}/deepcluster_models"
-MODEL="${MODELROOT}/alexnet/checkpoint.pth.tar"
-EXP="${HOME}/deepcluster_exp/linear_classif"
+MAIN_DIR=/home/farbod/honours
+DATA=${MAIN_DIR}/datasets/miniimagenet/
+#MODEL="${MAIN_DIR}/exps/251118_alexnet_mimagenet_last_layer/checkpoints/checkpoint_0.pth.tar"
+MODEL="${MAIN_DIR}/deepcluster/checkpoint.pth.tar"
+EXP="${MAIN_DIR}/exps/291118_alexnet_mimagenet_last_layer"
 
-PYTHON="${HOME}/test/conda/bin/python"
 
 mkdir -p ${EXP}
 
-${PYTHON} eval_linear.py --model ${MODEL} --data ${DATA} --conv 3 --lr 0.01 \
-  --wd -7 --tencrops --verbose --exp ${EXP} --workers 12
+python eval_linear.py --model ${MODEL} --data ${DATA} --conv 5 --lr 0.01 \
+  --wd -6 --verbose --exp ${EXP} --workers 4 --batch_size 128

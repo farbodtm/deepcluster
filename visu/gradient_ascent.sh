@@ -6,9 +6,16 @@
 #
 #!/bin/bash
 
-MODEL='/private/home/mathilde/model-to-release/alexnet/checkpoint.pth.tar'
-ARCH='vgg16'
-EXP='/private/home/mathilde/temp'
-CONV=6
+MAIN_DIR=/home/farbod/honours
+MODEL=${MAIN_DIR}/exps/281018_alexnet_all_cub_lr005/checkpoint_100.pth.tar
+ARCH='alexnet'
+EXP=${MAIN_DIR}/exps/281018_alexnet_all_cub_lr005
+
+MAIN_DIR=/home/farbod/honours/deepcluster
+MODEL=${MAIN_DIR}/checkpoint.pth.tar
+ARCH='alexnet'
+EXP=${MAIN_DIR}/viz_alex
+
+CONV=1
 
 python gradient_ascent.py --model ${MODEL} --exp ${EXP} --conv ${CONV} --arch ${ARCH}

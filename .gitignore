@@ -1,3 +1,4 @@
+*.tar
 **/.*.swp
 *.ipynb
 **/*.pyc
@@ -5,3 +6,7 @@
 .ipynb_checkpoints
 third-parties/
 third-parties/*
+*.swo
+*.swp
+*.jpg
+*.mat
